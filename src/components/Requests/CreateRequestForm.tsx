@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { Send, Paperclip, X, Upload } from 'lucide-react';
 
 interface CreateRequestFormProps {
@@ -9,7 +10,7 @@ interface CreateRequestFormProps {
 interface CreateRequestData {
   subject: string;
   message: string;
-  requestType: 'New Development' | 'Data Change' | 'System Bug';
+  requestType: string
   priorityId: number;
   attachments: File[];
 }
@@ -18,18 +19,109 @@ const CreateRequestForm: React.FC<CreateRequestFormProps> = ({ onSubmit, onCance
   const [formData, setFormData] = useState({
     subject: '',
     message: '',
-    requestType: 'System Bug' as 'New Development' | 'Data Change' | 'System Bug',
-    priorityId: 2 // Medium priority by default
+    requestType: '',
+    priorityId: 0
   });
   const [attachments, setAttachments] = useState<File[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [priorities, setPriorities] = useState<{ id: number; name: string }[]>([]);
+  const [requestTypes, setRequestTypes] = useState<{ id: number; name: string }[]>([]);
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return;
 
-  const handleSubmit = (e: React.FormEvent) => {
+    fetch('http://localhost:4000/api/master/priority-list', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.priorities)) {
+          setPriorities(data.priorities);
+          if (data.priorities.length > 0) {
+            setFormData(f => ({ ...f, priorityId: data.priorities[0].id }));
+          }
+        }
+      });
+
+    fetch('http://localhost:4000/api/master/request-type-list', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.requestTypes)) {
+          setRequestTypes(data.requestTypes);
+          if (data.requestTypes.length > 0) {
+            setFormData(f => ({ ...f, requestType: data.requestTypes[0].name as any }));
+          }
+        }
+      });
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({
-      ...formData,
-      attachments
-    });
+
+    // Convert attachments to base64
+    const filesBase64 = await Promise.all(
+      attachments.map(file => {
+        return new Promise(resolve => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            resolve({
+              fileName: file.name,
+              fileType: file.type,
+              fileSize: file.size,
+              base64: (reader.result as string).split(',')[1] // remove data:*/*;base64,
+            });
+          };
+          reader.readAsDataURL(file);
+        });
+      })
+    );
+
+    // Find requestTypeId from requestTypes
+    const selectedRequestType = requestTypes.find(rt => rt.name === formData.requestType);
+    const requestTypeId = selectedRequestType ? selectedRequestType.id : null;
+
+    // Get userId from localStorage
+    let userId = null;
+    try {
+      const user = JSON.parse(localStorage.getItem('auth_user') || '{}');
+      userId = user.userId || null;
+    } catch {}
+
+    const payload = {
+      subject: formData.subject,
+      message: formData.message,
+      requestType: formData.requestType,
+      requestTypeId,
+      priorityId: formData.priorityId,
+      userId,
+      attachments: filesBase64
+    };
+
+    const token = localStorage.getItem('accessToken');
+    try {
+      const res = await fetch('http://localhost:4000/api/request/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      const result = await res.json();
+      if (result.success) {
+        toast.success('Request saved successfully!');
+      } else {
+        toast.error(result.message || 'Failed to save request');
+      }
+    } catch (err) {
+      toast.error('Error saving request');
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,12 +178,12 @@ const CreateRequestForm: React.FC<CreateRequestFormProps> = ({ onSubmit, onCance
             id="requestType"
             required
             value={formData.requestType}
-            onChange={(e) => setFormData({ ...formData, requestType: e.target.value as 'New Development' | 'Data Change' | 'System Bug' })}
+            onChange={(e) => setFormData({ ...formData, requestType: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="System Bug">System Bug</option>
-            <option value="Data Change">Data Change</option>
-            <option value="New Development">New Development</option>
+            {requestTypes.map(rt => (
+              <option key={rt.id} value={rt.name}>{rt.name}</option>
+            ))}
           </select>
         </div>
 
@@ -120,9 +212,9 @@ const CreateRequestForm: React.FC<CreateRequestFormProps> = ({ onSubmit, onCance
             onChange={(e) => setFormData({ ...formData, priorityId: parseInt(e.target.value) })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value={3}>Low</option>
-            <option value={2}>Medium</option>
-            <option value={1}>High</option>
+            {priorities.map(p => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
           </select>
         </div>
 

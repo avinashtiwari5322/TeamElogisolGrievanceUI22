@@ -1,10 +1,12 @@
-import React from 'react';
+// ...existing code...
 import { AuthProvider, useAuth } from './context/AuthContext';
 import AuthPage from './pages/AuthPage';
 import Dashboard from './pages/Dashboard';
+import React from 'react';
+
 
 const AppContent: React.FC = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) {
     return (
@@ -15,6 +17,10 @@ const AppContent: React.FC = () => {
         </div>
       </div>
     );
+  }
+
+  if (!isAuthenticated) {
+    return <AuthPage />;
   }
 
   return isAuthenticated ? <Dashboard /> : <AuthPage />;

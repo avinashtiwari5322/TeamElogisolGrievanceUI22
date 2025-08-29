@@ -1,36 +1,50 @@
 import React from 'react';
-import { Clock, User, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
-import { Request } from '../../types';
+import { XCircle, User, Clock } from 'lucide-react';
+import type { Request } from '../../types';
+// interface Request {
+//   RequestId: number;
+//   Subject: string;
+//   Message: string;
+//   Remark: string | null;
+//   PriorityId: number;
+//   Priority: string;
+//   StatusId: number;
+//   Status: string;
+//   IsActive: boolean;
+//   DelMark: boolean;
+//   CreatedBy: string;
+//   CreatedOn: string;
+//   UpdatedBy: string | null;
+//   UpdatedOn: string | null;
+//   RequestTypeId: number;
+//   RequestType: string;
+// }
 
-interface RequestsListProps {
+interface RequestListContainerProps {
   requests: Request[];
   title: string;
   onRequestClick: (request: Request) => void;
 }
 
-const statusColors = {
-  Pending: 'bg-yellow-100 text-yellow-800',
-  Active: 'bg-blue-100 text-blue-800',
-  Dev: 'bg-purple-100 text-purple-800',
-  Stag: 'bg-indigo-100 text-indigo-800',
-  Uat: 'bg-orange-100 text-orange-800',
-  Live: 'bg-green-100 text-green-800',
-  Closed: 'bg-gray-100 text-gray-800'
+const priorityIcons: Record<string, React.ComponentType<{ className: string }>> = {
+  High: () => <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 3L3 17h14L10 3z"/></svg>,
+  Medium: () => <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7"/></svg>,
+  Low: () => <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 3h14v14H3z"/></svg>,
 };
 
-const priorityIcons = {
-  High: AlertTriangle,
-  Medium: Clock,
-  Low: CheckCircle
-};
-
-const priorityColors = {
+const priorityColors: Record<string, string> = {
   High: 'text-red-500',
   Medium: 'text-yellow-500',
-  Low: 'text-green-500'
+  Low: 'text-green-500',
 };
 
-const RequestsList: React.FC<RequestsListProps> = ({ requests, title, onRequestClick }) => {
+const statusColors: Record<string, string> = {
+  Active: 'bg-green-100 text-green-800',
+  Pending: 'bg-yellow-100 text-yellow-800',
+  Closed: 'bg-gray-100 text-gray-800',
+};
+
+const RequestListContainer: React.FC<RequestListContainerProps> = ({ requests, title, onRequestClick }) => {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       <div className="px-6 py-4 border-b border-gray-200">
@@ -44,7 +58,7 @@ const RequestsList: React.FC<RequestsListProps> = ({ requests, title, onRequestC
           </div>
         ) : (
           requests.map((request) => {
-            const PriorityIcon = priorityIcons[request.PriorityName as keyof typeof priorityIcons];
+            const PriorityIcon = priorityIcons[request.PriorityName as keyof typeof priorityIcons] || priorityIcons['Low'];
             return (
               <div
                 key={request.RequestId}
@@ -73,18 +87,13 @@ const RequestsList: React.FC<RequestsListProps> = ({ requests, title, onRequestC
                         <Clock className="h-3 w-3" />
                         <span>{new Date(request.CreatedOn).toLocaleDateString()}</span>
                       </div>
-                      {request.mailCount && request.mailCount > 0 && (
-                        <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
-                          {request.mailCount} messages
-                        </span>
-                      )}
                     </div>
                   </div>
                   <div className="ml-4 flex-shrink-0">
                     <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                      statusColors[request.StatusName! as keyof typeof statusColors]
+                      statusColors[request.Status as keyof typeof statusColors]
                     }`}>
-                      {request.StatusName}
+                      {request.Status}
                     </span>
                   </div>
                 </div>
@@ -97,4 +106,4 @@ const RequestsList: React.FC<RequestsListProps> = ({ requests, title, onRequestC
   );
 };
 
-export default RequestsList;
+export default RequestListContainer;

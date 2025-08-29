@@ -13,7 +13,7 @@ interface RegisterData {
   password: string;
   mobile?: string;
   companyName: string;
-  userType: 'User';
+  role: 'User';
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,8 +33,7 @@ const mockUsers: User[] = [
     userName: 'admin',
     email: 'admin@elogisol.com',
     roleId: 1,
-    roleName: 'Admin',
-    userType: 'Admin',
+    role: 'Admin',
     isActive: true
   },
   {
@@ -42,8 +41,7 @@ const mockUsers: User[] = [
     userName: 'john_doe',
     email: 'john@company.com',
     roleId: 2,
-    roleName: 'Customer',
-    userType: 'User',
+    role: 'User',
     companyId: 1,
     companyName: 'Tech Corp',
     isActive: true
@@ -72,22 +70,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {
-    // Mock authentication
-    const user = mockUsers.find(u => u.email === email);
-    if (user && password === 'password') {
-      localStorage.setItem('auth_user', JSON.stringify(user));
+    // Real API authentication
+    const response = await fetch('http://localhost:4000/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await response.json();
+    if (data.success && data.accessToken && data.user) {
+      // Store token and user details in localStorage
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('auth_user', JSON.stringify(data.user));
       setAuthState({
-        user,
+        user: data.user,
         isAuthenticated: true,
         isLoading: false
       });
     } else {
-      throw new Error('Invalid credentials');
+      throw new Error(data.message || 'Invalid credentials');
     }
   };
 
   const logout = () => {
     localStorage.removeItem('auth_user');
+    localStorage.removeItem('accessToken');
     setAuthState({
       user: null,
       isAuthenticated: false,
@@ -102,14 +110,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       userName: userData.userName,
       email: userData.email,
       mobile: userData.mobile,
-      roleId: 2,
-      roleName: 'Customer',
-      userType: 'User',
-      companyId: 1,
-      companyName: userData.companyName,
-      isActive: true
+      role: 'User',
+      isActive: true,
+      company: {
+        companyId: 1,
+        companyName: userData.companyName,
+        isActive: true
+      },
+      roleId: 0,
     };
-    
+
     mockUsers.push(newUser);
     localStorage.setItem('auth_user', JSON.stringify(newUser));
     setAuthState({

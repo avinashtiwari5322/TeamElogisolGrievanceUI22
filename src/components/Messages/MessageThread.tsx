@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Plus, ArrowLeft } from 'lucide-react';
-import { Mail, Request, User as UserType } from '../../types';
+import { Mail, Request, User as role } from '../../types';
 import MailList from './MailList';
 import MailView from './MailView';
 import ComposeModal from './ComposeModal';
 
 interface MessageThreadProps {
   mails: Mail[];
-  currentUser: UserType;
+  currentUser: role;
   onSendMail: (mailData: any) => void;
   onStarToggle: (mailId: number) => void;
   onArchive: (mailId: number) => void;

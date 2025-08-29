@@ -23,8 +23,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
 
     try {
       await login(formData.email, formData.password);
-    } catch (err) {
-      setError('Invalid email or password');
+      setError(''); // Clear error on success
+    } catch (err: any) {
+      setError(err?.message || 'Invalid email or password');
     } finally {
       setIsLoading(false);
     }
@@ -135,13 +136,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
           </button>
         </div>
 
-        <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-          <p className="text-xs text-gray-600 mb-2">Demo Credentials:</p>
-          <div className="space-y-1 text-xs">
-            <div><strong>Admin:</strong> admin@elogisol.com / password</div>
-            <div><strong>Customer:</strong> john@company.com / password</div>
-          </div>
-        </div>
+        
       </form>
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileText, Clock, CheckCircle, AlertTriangle, TrendingUp, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useRequests } from '../hooks/useRequests';
@@ -12,12 +12,13 @@ import AssignRequestForm from '../components/Admin/AssignRequestForm';
 import AnalyticsPage from '../components/Analytics/AnalyticsPage';
 import MessageThread from '../components/Messages/MessageThread';
 import StatusUpdateForm from '../components/Admin/StatusUpdateForm';
-import { Request } from '../types';
+import type { Request } from '../types';
+import RequestListContainer from '../components/Dashboard/RequestListContainer';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const { 
-    requests, 
+    requests: initialRequests, 
     loading, 
     createRequest, 
     updateRequestStatus, 
@@ -32,7 +33,7 @@ const Dashboard: React.FC = () => {
     statuses,
     users
   } = useRequests(
-    user?.userType === 'User' ? user.userId : undefined
+    user?.role === 'User' ? user.userId : undefined
   );
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -40,17 +41,52 @@ const Dashboard: React.FC = () => {
   const [showStatusUpdate, setShowStatusUpdate] = useState(false);
   const [showAssignForm, setShowAssignForm] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
+  const [requests, setRequests] = useState<Request[]>(initialRequests);
 
-  const isAdmin = user?.userType === 'Admin';
+  const isAdmin = user?.role === 'Admin';
+
+  // Fetch requests from API
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const user = JSON.parse(localStorage.getItem('auth_user') || '{}');
+        const userId = user.userId || null;
+        const response = await fetch('http://localhost:4000/api/request-fetch/fetch', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            userId: userId,
+            page: 1,
+            pageSize: 10,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch requests');
+        }
+
+        const data = await response.json();
+        setRequests(data.requests || []); // Assuming the API returns { requests: Request[] }
+      } catch (error) {
+        console.error('Error fetching requests:', error);
+      }
+    };
+
+    fetchRequests();
+  }, []);
 
   const getFilteredRequests = (filter: string) => {
     switch (filter) {
       case 'pending':
-        return requests.filter(r => r.status.statusName === 'Pending');
+        return requests.filter(r => r.Status === 'Pending');
       case 'active':
-        return requests.filter(r => r.status.statusName === 'Active');
+        return requests.filter(r => r.Status === 'Active');
       case 'closed':
-        return requests.filter(r => r.status.statusName === 'Closed');
+        return requests.filter(r => r.Status === 'Closed');
       default:
         return requests;
     }
@@ -59,6 +95,27 @@ const Dashboard: React.FC = () => {
   const handleCreateRequest = async (requestData: any) => {
     try {
       await createRequest(requestData);
+      // Refresh requests after creating a new one
+      const token = localStorage.getItem('accessToken');
+      const user = JSON.parse(localStorage.getItem('auth_user') || '{}');
+      const userId = user.userId || null;
+      const response = await fetch('http://localhost:4000/api/request-fetch/fetch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          userId: userId,
+          page: 1,
+          pageSize: 10,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setRequests(data.requests || []);
+      }
       setActiveTab('my-requests');
     } catch (error) {
       console.error('Error creating request:', error);
@@ -68,6 +125,23 @@ const Dashboard: React.FC = () => {
   const handleStatusUpdate = async (requestId: number, statusId: number, remark?: string) => {
     try {
       await updateRequestStatus(requestId, statusId, remark);
+      // Refresh requests after status update
+      const response = await fetch('http://localhost:4000/api/request-fetch/fetch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: localStorage.getItem('userId'),
+          page: 1,
+          pageSize: 10,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setRequests(data.requests || []);
+      }
       setShowStatusUpdate(false);
       setSelectedRequest(null);
       setActiveTab('dashboard');
@@ -79,6 +153,23 @@ const Dashboard: React.FC = () => {
   const handleAssignRequest = async (requestId: number, assignmentData: any) => {
     try {
       await assignRequest(requestId, assignmentData);
+      // Refresh requests after assignment
+      const response = await fetch('http://localhost:4000/api/request-fetch/fetch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: localStorage.getItem('userId'),
+          page: 1,
+          pageSize: 10,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setRequests(data.requests || []);
+      }
       setShowAssignForm(false);
       setSelectedRequest(null);
       setActiveTab('dashboard');
@@ -145,16 +236,16 @@ const Dashboard: React.FC = () => {
   const renderDashboardStats = () => {
     const stats = isAdmin ? [
       { title: 'Total Requests', value: requests.length, icon: FileText, color: 'blue' as const },
-      { title: 'Pending', value: requests.filter(r => r.status.statusName === 'Pending').length, icon: Clock, color: 'yellow' as const },
-      { title: 'Active', value: requests.filter(r => r.status.statusName === 'Active').length, icon: TrendingUp, color: 'blue' as const },
-      { title: 'Closed', value: requests.filter(r => r.status.statusName === 'Closed').length, icon: CheckCircle, color: 'green' as const },
-      { title: 'High Priority', value: requests.filter(r => r.priority.priorityName === 'High').length, icon: AlertTriangle, color: 'red' as const },
+      { title: 'Pending', value: requests.filter(r => r.Status === 'Pending').length, icon: Clock, color: 'yellow' as const },
+      { title: 'Active', value: requests.filter(r => r.Status === 'Active').length, icon: TrendingUp, color: 'blue' as const },
+      { title: 'Closed', value: requests.filter(r => r.Status === 'Closed').length, icon: CheckCircle, color: 'green' as const },
+      { title: 'High Priority', value: requests.filter(r => r.PriorityName === 'High').length, icon: AlertTriangle, color: 'red' as const },
       { title: 'Active Users', value: 24, icon: Users, color: 'purple' as const }
     ] : [
       { title: 'My Requests', value: requests.length, icon: FileText, color: 'blue' as const },
-      { title: 'Pending', value: requests.filter(r => r.status.statusName === 'Pending').length, icon: Clock, color: 'yellow' as const },
-      { title: 'In Progress', value: requests.filter(r => ['Active', 'Dev', 'Stag', 'Uat'].includes(r.status.statusName)).length, icon: TrendingUp, color: 'blue' as const },
-      { title: 'Resolved', value: requests.filter(r => r.status.statusName === 'Closed').length, icon: CheckCircle, color: 'green' as const }
+      { title: 'Pending', value: requests.filter(r => r.Status === 'Pending').length, icon: Clock, color: 'yellow' as const },
+      { title: 'In Progress', value: requests.filter(r => ['Active', 'Dev', 'Stag', 'Uat'].includes(r.Status!)).length, icon: TrendingUp, color: 'blue' as const },
+      { title: 'Resolved', value: requests.filter(r => r.Status === 'Closed').length, icon: CheckCircle, color: 'green' as const }
     ];
 
     return (
@@ -180,12 +271,12 @@ const Dashboard: React.FC = () => {
             {renderDashboardStats()}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <RequestsList
-                requests={requests.filter(r => r.status.statusName === 'Pending').slice(0, 5)}
+                requests={requests.filter(r => r.StatusName === 'Pending').slice(0, 5)}
                 title="Recent Pending Requests"
                 onRequestClick={handleRequestClick}
               />
               <RequestsList
-                requests={requests.filter(r => ['Active', 'Dev'].includes(r.status.statusName)).slice(0, 5)}
+                requests={requests.filter(r => ['Active', 'Dev'].includes(r.StatusName!)).slice(0, 5)}
                 title="Active Requests"
                 onRequestClick={handleRequestClick}
               />
@@ -196,7 +287,7 @@ const Dashboard: React.FC = () => {
       case 'my-requests':
       case 'all-requests':
         return (
-          <RequestsList
+          <RequestListContainer
             requests={requests}
             title={isAdmin ? "All Requests" : "My Requests"}
             onRequestClick={handleRequestClick}
@@ -250,7 +341,7 @@ const Dashboard: React.FC = () => {
           return (
             <AssignRequestForm
               request={selectedRequest}
-              availableUsers={users.filter(u => u.userType !== 'User')}
+              availableUsers={users.filter(u => u.role !== 'User')}
               onAssign={handleAssignRequest}
               onCancel={() => setShowAssignForm(false)}
             />

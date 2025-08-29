@@ -44,23 +44,6 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle, isSidebarOpen }) => {
         </div>
 
         <div className="flex items-center space-x-4">
-          <button className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-            <Bell className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-              3
-            </span>
-          </button>
-
-          <button 
-            onClick={() => window.dispatchEvent(new CustomEvent('openMessages'))}
-            className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <Mail className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-              5
-            </span>
-          </button>
-
           <div className="relative group">
             <button className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors">
               <div className="bg-gray-200 p-2 rounded-full">
@@ -68,7 +51,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle, isSidebarOpen }) => {
               </div>
               <div className="text-left hidden md:block">
                 <div className="text-sm font-medium text-gray-900">{user?.userName}</div>
-                <div className="text-xs text-gray-500">{user?.userType}</div>
+                <div className="text-xs text-gray-500">{user?.role}</div>
               </div>
             </button>
 

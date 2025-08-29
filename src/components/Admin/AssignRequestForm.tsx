@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Save, X, Calendar, User } from 'lucide-react';
-import { Request, User as UserType } from '../../types';
+import { Request, User as role } from '../../types';
 
 interface AssignRequestFormProps {
   request: Request;
-  availableUsers: UserType[];
+  availableUsers: role[];
   onAssign: (requestId: number, assignmentData: AssignmentData) => void;
   onCancel: () => void;
 }

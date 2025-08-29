@@ -22,7 +22,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen, onClose }) => {
   const { user } = useAuth();
-  const isAdmin = user?.userType === 'Admin';
+  const isAdmin = user?.role === 'Admin';
 
   const customerMenuItems = [
     { id: 'dashboard', icon: Home, label: 'Dashboard' },
@@ -62,7 +62,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen, onClo
             {isAdmin ? 'Admin Portal' : 'Customer Portal'}
           </div>
           <div className="text-xs text-gray-400 mt-1">
-            {user?.companyName || 'Team Elogisol'}
+            {user?.company?.companyName || 'Team Elogisol'}
           </div>
         </div>
 

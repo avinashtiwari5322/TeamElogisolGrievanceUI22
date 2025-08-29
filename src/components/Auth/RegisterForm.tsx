@@ -39,7 +39,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
         password: formData.password,
         mobile: formData.mobile,
         companyName: formData.companyName,
-        userType: 'User'
+        role: 'User'
       });
     } catch (err) {
       setError('Registration failed. Please try again.');

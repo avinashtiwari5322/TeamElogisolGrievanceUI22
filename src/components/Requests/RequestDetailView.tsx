@@ -135,7 +135,7 @@ const RequestDetailView: React.FC<RequestDetailViewProps> = ({ request, onBack }
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                     {request.devTargetDate && (
                       <div className="bg-white rounded p-3 border border-green-200">
-                        <div className="text-xs font-medium text-gray-500 uppercase">Development</div>
+                        <div className="text-xs font-medium text-gray-500 uppercase">Development Target</div>
                         <div className="text-sm font-medium text-gray-900 mt-1">
                           {new Date(request.devTargetDate).toLocaleDateString()}
                         </div>
