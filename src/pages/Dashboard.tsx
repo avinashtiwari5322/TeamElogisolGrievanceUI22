@@ -52,7 +52,7 @@ const Dashboard: React.FC = () => {
         const token = localStorage.getItem('accessToken');
         const user = JSON.parse(localStorage.getItem('auth_user') || '{}');
         const userId = user.userId || null;
-        const response = await fetch('http://localhost:4000/api/request-fetch/fetch', {
+        const response = await fetch('https://teamelogisolgrievanceapi.onrender.com/api/request-fetch/fetch', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -99,7 +99,7 @@ const Dashboard: React.FC = () => {
       const token = localStorage.getItem('accessToken');
       const user = JSON.parse(localStorage.getItem('auth_user') || '{}');
       const userId = user.userId || null;
-      const response = await fetch('http://localhost:4000/api/request-fetch/fetch', {
+      const response = await fetch('https://teamelogisolgrievanceapi.onrender.com/api/request-fetch/fetch', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -126,7 +126,7 @@ const Dashboard: React.FC = () => {
     try {
       await updateRequestStatus(requestId, statusId, remark);
       // Refresh requests after status update
-      const response = await fetch('http://localhost:4000/api/request-fetch/fetch', {
+      const response = await fetch('https://teamelogisolgrievanceapi.onrender.com/api/request-fetch/fetch', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -154,7 +154,7 @@ const Dashboard: React.FC = () => {
     try {
       await assignRequest(requestId, assignmentData);
       // Refresh requests after assignment
-      const response = await fetch('http://localhost:4000/api/request-fetch/fetch', {
+      const response = await fetch('https://teamelogisolgrievanceapi.onrender.com/api/request-fetch/fetch', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

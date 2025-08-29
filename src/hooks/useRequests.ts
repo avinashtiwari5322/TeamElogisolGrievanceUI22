@@ -47,7 +47,7 @@ export const useRequests = (userId?: number): UseRequestsReturn => {
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:4000/api/request-fetch/fetch', {
+      const response = await fetch('https://teamelogisolgrievanceapi.onrender.com/api/request-fetch/fetch', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -123,7 +123,7 @@ export const useRequests = (userId?: number): UseRequestsReturn => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/users', {
+      const response = await fetch('https://teamelogisolgrievanceapi.onrender.com/api/users', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -163,7 +163,7 @@ export const useRequests = (userId?: number): UseRequestsReturn => {
 
   const fetchMails = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/mails', {
+      const response = await fetch('https://teamelogisolgrievanceapi.onrender.com/api/mails', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -208,7 +208,7 @@ export const useRequests = (userId?: number): UseRequestsReturn => {
 
   const createRequest = async (requestData: any) => {
     try {
-      const response = await fetch('http://localhost:4000/api/request/create', {
+      const response = await fetch('https://teamelogisolgrievanceapi.onrender.com/api/request/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestData),
@@ -223,7 +223,7 @@ export const useRequests = (userId?: number): UseRequestsReturn => {
 
   const updateRequestStatus = async (requestId: number, statusId: number, remark?: string) => {
     try {
-      const response = await fetch('http://localhost:4000/api/request/status', {
+      const response = await fetch('https://teamelogisolgrievanceapi.onrender.com/api/request/status', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ requestId, statusId, remark }),
@@ -238,7 +238,7 @@ export const useRequests = (userId?: number): UseRequestsReturn => {
 
   const assignRequest = async (requestId: number, assignmentData: any) => {
     try {
-      const response = await fetch('http://localhost:4000/api/request/assign', {
+      const response = await fetch('https://teamelogisolgrievanceapi.onrender.com/api/request/assign', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ requestId, ...assignmentData }),
@@ -261,7 +261,7 @@ export const useRequests = (userId?: number): UseRequestsReturn => {
 
   const sendMail = async (messageData: any) => {
     try {
-      const response = await fetch('http://localhost:4000/api/mail/send', {
+      const response = await fetch('https://teamelogisolgrievanceapi.onrender.com/api/mail/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(messageData),
@@ -276,7 +276,7 @@ export const useRequests = (userId?: number): UseRequestsReturn => {
 
   const toggleStar = async (mailId: number) => {
     try {
-      const response = await fetch(`http://localhost:4000/api/mail/${mailId}/star`, {
+      const response = await fetch(`https://teamelogisolgrievanceapi.onrender.com/api/mail/${mailId}/star`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -290,7 +290,7 @@ export const useRequests = (userId?: number): UseRequestsReturn => {
 
   const archiveMail = async (mailId: number) => {
     try {
-      const response = await fetch(`http://localhost:4000/api/mail/${mailId}/archive`, {
+      const response = await fetch(`https://teamelogisolgrievanceapi.onrender.com/api/mail/${mailId}/archive`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -304,7 +304,7 @@ export const useRequests = (userId?: number): UseRequestsReturn => {
 
   const deleteMail = async (mailId: number) => {
     try {
-      const response = await fetch(`http://localhost:4000/api/mail/${mailId}`, {
+      const response = await fetch(`https://teamelogisolgrievanceapi.onrender.com/api/mail/${mailId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
       });

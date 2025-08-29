@@ -71,7 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string): Promise<void> => {
     // Real API authentication
-    const response = await fetch('http://localhost:4000/api/auth/login', {
+    const response = await fetch('https://teamelogisolgrievanceapi.onrender.com/api/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

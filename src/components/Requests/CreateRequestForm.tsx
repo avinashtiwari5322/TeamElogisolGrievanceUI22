@@ -30,7 +30,7 @@ const CreateRequestForm: React.FC<CreateRequestFormProps> = ({ onSubmit, onCance
     const token = localStorage.getItem('accessToken');
     if (!token) return;
 
-    fetch('http://localhost:4000/api/master/priority-list', {
+    fetch('https://teamelogisolgrievanceapi.onrender.com/api/master/priority-list', {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -45,7 +45,7 @@ const CreateRequestForm: React.FC<CreateRequestFormProps> = ({ onSubmit, onCance
         }
       });
 
-    fetch('http://localhost:4000/api/master/request-type-list', {
+    fetch('https://teamelogisolgrievanceapi.onrender.com/api/master/request-type-list', {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -105,7 +105,7 @@ const CreateRequestForm: React.FC<CreateRequestFormProps> = ({ onSubmit, onCance
 
     const token = localStorage.getItem('accessToken');
     try {
-      const res = await fetch('http://localhost:4000/api/request/save', {
+      const res = await fetch('https://teamelogisolgrievanceapi.onrender.com/api/request/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
